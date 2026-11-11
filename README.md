@@ -58,11 +58,3 @@ pytest -q                            # тести
 ## Обмеження
 
 Мітку присвоєно за джерелом публікації, а не за перевіркою окремих тверджень. Корпус містить англомовні новини про політику США 2015-2018 років. Частина відмінностей між класами тематична, і повністю відокремити тему від стилю в межах корпусу неможливо.
-
-## Джерела
-
-1. Ahmad H., Traore I., Saad S. Detection of online fake news using n-gram analysis and machine learning techniques. *ISDDC 2017*. LNCS. 2017. Vol. 10618. P. 127-138.
-2. Dietterich T. G. Approximate statistical tests for comparing supervised classification learning algorithms. *Neural Computation*. 1998. Vol. 10, No. 7. P. 1895-1923.
-3. Geirhos R. et al. Shortcut learning in deep neural networks. *Nature Machine Intelligence*. 2020. Vol. 2. P. 665-673.
-
-Повний список джерел наведено в дослідницькому записнику.
