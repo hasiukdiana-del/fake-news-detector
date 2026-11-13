@@ -45,15 +45,7 @@ tests/          автотести препроцесингу
 pip install -r requirements.txt
 ```
 
-Завантажте [Fake and Real News Dataset](https://www.kaggle.com/datasets/clmentbisaillon/fake-and-real-news-dataset) і покладіть `Fake.csv` та `True.csv` у `data/raw/`.
 
-```bash
-python -m src.data                   # очищення та поділ даних
-python -m src.train                  # навчання моделей
-python -m src.evaluate               # оцінювання на тестовій вибірці
-streamlit run app/streamlit_app.py   # прототип
-pytest -q                            # тести
-```
 
 ## Обмеження
 
