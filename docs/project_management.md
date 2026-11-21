@@ -1,166 +1,161 @@
-# Управління проєктом
+# Project management
 
-Методологія: Scrum-подібний цикл із чотирьох тижневих спринтів. Ієрархія: **епік → юзер сторі → таска → сабтаска**.
-Кожна юзер сторі стає issue на GitHub, таски всередині неї стають чекбоксами (task list), а епік стає milestone.
-Створити все автоматично: `bash scripts/create_github_issues.sh` (потрібен `gh auth login`).
+Process: a Scrum-like cycle of four one-week sprints. Hierarchy: **epic → user story → task → subtask**.
+Each epic is a GitHub milestone and an epic issue. Each user story is an issue; its tasks are a checklist.
+Commit messages reference the related issue number, for example `(#4)`.
 
 ## Definition of Done
 
-* код у гілці злито через pull request з посиланням на issue (`Closes #N`);
-* тести проходять, записник виконується згори донизу;
-* результати й рішення зафіксовано в записнику або README.
+* the change is committed with a reference to its issue;
+* tests pass and the notebook runs top to bottom;
+* results and decisions are recorded in the notebook or the README.
 
-## Робота з Git
+## Sprint plan
 
-* гілка на кожну історію: `feature/us4-bilstm`;
-* коміти малі й змістовні, у форматі Conventional Commits: `feat(data): strip Reuters dateline`, `test: add split stratification test`;
-* комітити в міру виконання кожної таски, а не одним комітом наприкінці: викладач оцінює рівномірність історії.
-
-## План спринтів
-
-| Спринт | Фокус | Історії |
+| Sprint | Focus | Stories |
 |---|---|---|
-| 1 | Дані та витік ознак | US1, US2, US8 |
-| 2 | Моделі | US3, US4 |
-| 3 | Оцінювання і прототип | US5, US6, US7 |
-| 4 | Документація і захист | US9, US10 |
+| 1 | Data and feature leakage | US1, US2, US8 |
+| 2 | Models | US3, US4 |
+| 3 | Evaluation and prototype | US5, US6, US7 |
+| 4 | Documentation and defence | US9, US10 |
 
-## E1. Дані та дослідження
+## E1. Data and exploration
 
-*Мета:* Отримати чистий, перевірений на витік ознак датасет і зрозуміти його структуру.
+*Goal:* Obtain a clean, leakage-audited dataset and understand its structure.
 
-### US1
+### US1. Load and describe the dataset
 
-Як дослідниця, я хочу завантажити й описати датасет, щоб знати його обсяг, баланс класів і якість.
+As a researcher, I want to load and describe the dataset, so that I know its size, class balance and quality.
 
-**Таски:**
+**Tasks:**
 
-- [ ] Завантажити Fake.csv і True.csv з Kaggle у data/raw
-- [ ] Перевірити пропуски, порожні тексти, дублікати
-- [ ] Побудувати гістограму й boxplot довжини статей
-- [ ] Перевірити нормальність довжини (тест Д'Агостіно, QQ-plot)
+- [ ] Download Fake.csv and True.csv from Kaggle into data/raw
+- [ ] Check missing values, empty texts and duplicates
+- [ ] Plot the article length histogram and boxplot
+- [ ] Test length normality (D'Agostino-Pearson test, Q-Q plot)
 
-**Критерій приймання:** Розділ 2 записника виконується без помилок; ключові числа зафіксовано в markdown.
+**Acceptance criteria:** Section 2 of the notebook runs without errors; key figures are reported in markdown.
 
-### US2
+### US2. Detect feature leakage
 
-Як дослідниця, я хочу виявити витік ознак, щоб модель вчилася на мові тексту, а не на слідах джерела.
+As a researcher, I want to detect feature leakage, so that the model learns from the language of the text rather than from source artefacts.
 
-**Таски:**
+**Tasks:**
 
-- [ ] Таблиця subject x label
-- [ ] Частка маркерів (Reuters), Getty Images, pic.twitter.com за класами
-- [ ] Експеримент: F1 моделі лише на subject і лише на маркері Reuters
-- [ ] Реалізувати strip_leakage у src/data.py
-- [ ] Дедуплікація до розбиття, стратифікований split 70/15/15
+- [ ] Cross-tabulate subject against label
+- [ ] Measure the share of (Reuters), Getty Images and pic.twitter.com markers by class
+- [ ] Experiment: F1 of a model trained on subject only and on the Reuters marker only
+- [ ] Implement strip_leakage in src/data.py
+- [ ] Deduplicate before splitting; stratified 70/15/15 split
 
-**Критерій приймання:** Після очищення частка 'reuters' у текстах менша за 0,01%; тести tests/test_data.py проходять.
+**Acceptance criteria:** After cleaning, fewer than 0.01% of texts mention 'reuters'; tests/test_data.py passes.
 
-## E2. Моделювання й оцінювання
+## E2. Modelling and evaluation
 
-*Мета:* Побудувати базову і глибоку моделі та чесно порівняти їх на тестовій вибірці.
+*Goal:* Build the baseline and the deep model and compare them fairly on the held-out test set.
 
-### US3
+### US3. Build a TF-IDF + logistic regression baseline
 
-Як ML-інженерка, я хочу мати базову модель TF-IDF + LogReg, щоб знати, чи виправдана глибока модель.
+As an ML engineer, I want a TF-IDF + logistic regression baseline, so that I know whether a deep model is justified.
 
-**Таски:**
+**Tasks:**
 
-- [ ] build_baseline у src/models.py
-- [ ] Навчання в src/train.py --model baseline
-- [ ] Classification report на validation
+- [ ] build_baseline in src/models.py
+- [ ] Training via src/train.py --model baseline
+- [ ] Validation metrics report
 
-**Критерій приймання:** Модель збережено в models/; метрики validation записано в ноутбуці.
+**Acceptance criteria:** The model is saved to models/; validation metrics are reported in the notebook.
 
-### US4
+### US4. Train a deep neural network
 
-Як ML-інженерка, я хочу навчити глибоку нейронну мережу, щоб перевершити базову модель.
+As an ML engineer, I want to train a deep neural network, so that it outperforms the baseline.
 
-**Таски:**
+**Tasks:**
 
 - [ ] build_dnn_parts: TF-IDF + MLP (256, 64)
-- [ ] Навчання по епохах з ранньою зупинкою за validation log-loss
-- [ ] Збереження найкращої епохи в models/
-- [ ] Криві навчання loss і F1
-- [ ] BiLSTM як необов'язкове розширення
+- [ ] Epoch-wise training with early stopping on validation log-loss
+- [ ] Save the best epoch to models/
+- [ ] Loss and F1 learning curves
+- [ ] BiLSTM as an optional extension
 
-**Критерій приймання:** Модель зберігається й завантажується; криві навчання збережено в reports/figures.
+**Acceptance criteria:** The model can be saved and loaded; learning curves are saved to reports/figures.
 
-### US5
+### US5. Evaluate both models on the test set
 
-Як дослідниця, я хочу оцінити обидві моделі на тестовій вибірці, щоб порівняти їх за precision, recall, F1 і ROC-AUC.
+As a researcher, I want to evaluate both models on the test set, so that I can compare precision, recall, F1 and ROC-AUC.
 
-**Таски:**
+**Tasks:**
 
-- [ ] src/evaluate.py: metrics.json, confusion matrices, ROC
-- [ ] Аналіз зони невизначеності
-- [ ] Аналіз 10 найвпевненіших помилок
+- [ ] src/evaluate.py: metrics.json, confusion matrices, ROC curves
+- [ ] McNemar test and bootstrap confidence intervals
+- [ ] Uncertainty zone analysis
+- [ ] Analysis of the 10 most confident errors
 
-**Критерій приймання:** reports/metrics.json існує; висновки в розділах 3 і 5 записника заповнено цифрами.
+**Acceptance criteria:** reports/metrics.json exists; sections 3 and 5 of the notebook report the figures.
 
-## E3. Прототип сервісу
+## E3. Service prototype
 
-*Мета:* Дати нетехнічному користувачеві простий інструмент перевірки тексту.
+*Goal:* Give a non-technical user a simple tool for checking a text.
 
-### US6
+### US6. Score a news article for fake probability
 
-Як журналістка, я хочу вставити текст новини й отримати оцінку ймовірності фейку, щоб вирішити, чи потрібна ручна перевірка.
+As a journalist, I want to paste an article and get a fake probability, so that I can decide whether manual review is needed.
 
-**Таски:**
+**Tasks:**
 
-- [ ] Сторінка Streamlit із полем тексту й прикладами
-- [ ] Вердикт у трьох зонах: надійна, невпевнено, фейк
-- [ ] Пояснення: слова, що вплинули на оцінку
+- [ ] Streamlit page with a text field and examples
+- [ ] Three-zone verdict: reliable, uncertain, fake
+- [ ] Explanation: words that influenced the score
 
-**Критерій приймання:** streamlit run app/streamlit_app.py працює локально; відповідь за менше ніж 2 секунди.
+**Acceptance criteria:** streamlit run app/streamlit_app.py works locally; response time is under 2 seconds.
 
-### US7
+### US7. Show model quality and limitations
 
-Як користувач, я хочу бачити якість моделі та її обмеження, щоб не довіряти їй сліпо.
+As a user, I want to see the model's quality and limitations, so that I do not trust it blindly.
 
-**Таски:**
+**Tasks:**
 
-- [ ] Метрики з metrics.json у боковій панелі
-- [ ] Попередження: модель не перевіряє факти
-- [ ] Опис корпусу й періоду
+- [ ] Test-set metrics from metrics.json in the sidebar
+- [ ] Warning: the model does not verify facts
+- [ ] Description of the corpus and period
 
-**Критерій приймання:** Обмеження видно без прокручування сторінки.
+**Acceptance criteria:** Limitations are visible without scrolling.
 
-## E4. Якість, документація, захист
+## E4. Quality, documentation and defence
 
-*Мета:* Зробити проєкт відтворюваним і підготувати презентацію.
+*Goal:* Make the project reproducible and prepare the presentation.
 
-### US8
+### US8. Add preprocessing tests
 
-Як розробниця, я хочу мати автотести препроцесингу, щоб зміни не зламали очищення.
+As a developer, I want automated preprocessing tests, so that changes do not break the cleaning.
 
-**Таски:**
+**Tasks:**
 
-- [ ] Тести на вилучення датлайну Reuters і підписів до фото
-- [ ] Тести на дедуплікацію і стратифікацію
+- [ ] Tests for removal of the Reuters dateline and image credits
+- [ ] Tests for deduplication and stratification
 
-**Критерій приймання:** pytest проходить без помилок.
+**Acceptance criteria:** pytest passes.
 
-### US9
+### US9. Reproduce the project from the README
 
-Як викладач, я хочу відтворити проєкт за README, щоб перевірити результати.
+As a lecturer, I want to reproduce the project from the README, so that I can verify the results.
 
-**Таски:**
+**Tasks:**
 
-- [ ] README: структура, встановлення, запуск, Colab
+- [ ] README: structure, installation, quick start
 - [ ] requirements.txt
-- [ ] Фіксований seed
+- [ ] Fixed random seed
 
-**Критерій приймання:** Проєкт запускається з нуля за інструкцією.
+**Acceptance criteria:** The project runs from scratch by following the instructions.
 
-### US10
+### US10. Prepare a presentation for a non-technical audience
 
-Як доповідачка, я хочу презентацію для нетехнічної аудиторії, щоб пояснити цінність і межі сервісу.
+As a presenter, I want a presentation for a non-technical audience, so that I can explain the value and limits of the service.
 
-**Таски:**
+**Tasks:**
 
-- [ ] Слайди без жаргону
-- [ ] Живе демо Streamlit
-- [ ] Репетиція на 7-10 хвилин
+- [ ] Jargon-free slides
+- [ ] Live Streamlit demo
+- [ ] 7-10 minute rehearsal
 
-**Критерій приймання:** Презентація заповнена реальними метриками з metrics.json.
+**Acceptance criteria:** The presentation uses real metrics from metrics.json.
