@@ -1,1 +1,1 @@
-"""Виявлення фейкових новин: дані, моделі, навчання, оцінювання."""
+"""Fake news detection: data preparation, models, training and evaluation."""
