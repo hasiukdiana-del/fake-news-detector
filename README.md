@@ -1,45 +1,60 @@
-# Виявлення фейкових новин методами глибинного навчання
+# Fake News Detection with Deep Learning
 
-Курсовий проєкт з дисципліни «Глибинне навчання».
-Виконала Діана Гасюк, група ІПЗ-41, Карпатський національний університет імені Василя Стефаника, 2026.
+Course project, *Deep Learning*, Vasyl Stefanyk Carpathian National University, 2026.
+Team 10: Diana Hasiuk, Yuliia Dolishnia (group IPZ-41).
 
-## Опис
+## Overview
 
-Проєкт оцінює ймовірність того, що англомовна новина походить з ненадійного джерела, за мовою самого тексту. Основна модель: глибока нейронна мережа на ознаках TF-IDF. Базова модель для порівняння: логістична регресія. Прототип сервісу реалізовано на Streamlit.
+The project estimates whether an English-language news article comes from an unreliable source, using only the language of the text. The main model is a deep neural network on TF-IDF features. A logistic regression on the same features serves as the baseline. A Streamlit prototype exposes the model to a non-technical user.
 
-Модель не перевіряє факти. Її результат призначений для попереднього відбору матеріалів фактчекером.
+The model does not verify facts. Its output is intended to prioritise articles for manual fact-checking.
 
-## Ключовий методологічний результат
+## Key methodological finding
 
-У корпусі мітку класу майже повністю визначають службові ознаки джерела: датлайн «(Reuters)», поле `subject`, підписи до ілюстрацій. Класифікатор лише за полем `subject` досягає F1 = 1,000. Ці ознаки та повторювані тексти вилучено до поділу вибірки, тому модель навчається на мові новини, а не на маркерах джерела. Аудит описано в розділі 2.3 [дослідницького записника](notebooks/01_research.ipynb).
+In the source corpus the class label is almost fully determined by publisher artefacts: the Reuters dateline, the `subject` field and image credits. A classifier that sees only the `subject` field reaches F1 = 1.000. These artefacts and duplicate texts are removed before the train/test split, so the model learns from the language of the article rather than from source markers. The audit is documented in section 2.3 of the [research notebook](notebooks/01_research.ipynb).
 
-## Результати
+## Results
 
-Тестова вибірка: 5 824 статті, не використані під час навчання.
+Held-out test set: 5,824 articles not used for training or model selection.
 
-| Модель | Accuracy | Precision | Recall | F1 | ROC-AUC |
+| Model | Accuracy | Precision | Recall | F1 | ROC-AUC |
 |---|---|---|---|---|---|
-| TF-IDF + логістична регресія | 0,9878 | 0,9891 | 0,9844 | 0,9867 | 0,9992 |
-| **Глибока нейронна мережа** | **0,9902** | 0,9888 | **0,9899** | **0,9894** | **0,9996** |
+| TF-IDF + logistic regression | 0.9878 | 0.9891 | 0.9844 | 0.9867 | 0.9992 |
+| **Deep neural network** | **0.9902** | 0.9888 | **0.9899** | **0.9894** | **0.9996** |
 
-Нейронна мережа має статистично значуще вищу повноту за класом «фейк» (точний тест Мак-Немара, p = 0,008). Різниця загальної точності незначуща (p = 0,076).
+The network has significantly higher recall on the fake class (exact McNemar test, p = 0.008). The difference in overall accuracy is not significant (p = 0.076).
 
-## Структура репозиторію
+## Repository structure
 
 ```
-app/            прототип на Streamlit
-data/           вихідні та оброблені дані (не зберігаються в репозиторії)
-docs/           управління проєктом
-models/         навчені моделі (створюються під час навчання)
-notebooks/      дослідницький записник
-reports/        метрики та рисунки
-src/            підготовка даних, моделі, навчання, оцінювання, передбачення
-tests/          автотести препроцесингу
+app/            Streamlit prototype
+data/           raw and processed data (not stored in the repository)
+docs/           project management
+models/         trained models (created by training)
+notebooks/      research notebook
+reports/        metrics and figures
+src/            data preparation, models, training, evaluation, inference
+tests/          preprocessing tests
 ```
 
+## Quick start
 
+Python 3.10 or newer is required.
 
+```bash
+pip install -r requirements.txt
+```
 
-## Обмеження
+Download the [Fake and Real News Dataset](https://www.kaggle.com/datasets/clmentbisaillon/fake-and-real-news-dataset) and place `Fake.csv` and `True.csv` in `data/raw/`.
 
-Мітку присвоєно за джерелом публікації, а не за перевіркою окремих тверджень. Корпус містить англомовні новини про політику США 2015-2018 років. Частина відмінностей між класами тематична, і повністю відокремити тему від стилю в межах корпусу неможливо.
+```bash
+python -m src.data                   # cleaning and stratified split
+python -m src.train                  # model training
+python -m src.evaluate               # test-set evaluation
+streamlit run app/streamlit_app.py   # prototype
+pytest -q                            # tests
+```
+
+## Limitations
+
+Labels are assigned by publisher, not by verification of individual claims. The corpus covers English-language news on US politics from 2015 to 2018. Part of the difference between classes is topical, and topic cannot be fully separated from style within this corpus.
